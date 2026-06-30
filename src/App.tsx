@@ -4,14 +4,13 @@
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Compass } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import TopNav from './components/TopNav';
 import LayerPanel from './components/LayerPanel';
 import SearchBar from './components/SearchBar';
 import TimelineControl from './components/TimelineControl';
 import LocationDrawer from './components/LocationDrawer';
 import AtlasMap from './components/AtlasMap';
+import TourController from './components/TourController';
 import { AboutModal, SourcesModal } from './components/ScholarlyModals';
 import { LOCATIONS, LocationData, HISTORICAL_ERAS } from './data/locations';
 
@@ -65,6 +64,7 @@ export default function App() {
   const [showSourcesModal, setShowSourcesModal] = useState<boolean>(false);
   const [resetViewTrigger, setResetViewTrigger] = useState<number>(0);
   const [focusedLocation, setFocusedLocation] = useState<LocationData | null>(null);
+  const [isTourActive, setIsTourActive] = useState<boolean>(false);
 
   // Historical Personas and Stops State
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
@@ -77,6 +77,7 @@ export default function App() {
       setSelectedLocationId(null);
       setFocusedLocation(null);
       setFocusedCustomPoint(null);
+      setIsTourActive(false); // Disable tour mode when launching a persona journey
     } else {
       setFocusedCustomPoint(null);
     }
@@ -86,42 +87,14 @@ export default function App() {
     setFocusedCustomPoint({ coordinates: coords, name, description });
     setSelectedLocationId(null);
     setFocusedLocation(null);
+    setIsTourActive(false); // Disable tour mode on custom focus
   };
 
-  const [targetEraId, setTargetEraId] = useState<string | null>(null);
-  const [isEraTransitioning, setIsEraTransitioning] = useState<boolean>(false);
-
-  // Era Transition Logic
+  // Era Selection Logic - Instant and unblurred
   const handleSelectEra = (eraId: string) => {
     if (eraId === selectedEraId) return;
-    setTargetEraId(eraId);
-    setIsEraTransitioning(true);
+    setSelectedEraId(eraId);
   };
-
-  useEffect(() => {
-    if (isEraTransitioning && targetEraId !== null) {
-      // 1. Give 500ms for overlay to fade in fully
-      const timer1 = setTimeout(() => {
-        setSelectedEraId(targetEraId);
-      }, 500);
-
-      // 2. Keep visible for a brief moment, then fade out
-      const timer2 = setTimeout(() => {
-        setIsEraTransitioning(false);
-        setTargetEraId(null);
-      }, 1800);
-
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-      };
-    }
-  }, [isEraTransitioning, targetEraId]);
-
-  const targetEra = useMemo(() => {
-    if (!targetEraId) return null;
-    return HISTORICAL_ERAS.find(e => e.id === targetEraId) || null;
-  }, [targetEraId]);
 
   // 1. Get current selected location object
   const selectedLocation = useMemo(() => {
@@ -196,6 +169,7 @@ export default function App() {
     setFocusedLocation(null);
     setSelectedPersonaId(null);
     setFocusedCustomPoint(null);
+    setIsTourActive(false);
     setResetViewTrigger(prev => prev + 1);
   };
 
@@ -295,87 +269,16 @@ export default function App() {
         onClose={() => setShowSourcesModal(false)}
       />
 
-      {/* Cinematic Temporal Shift Transition Overlay */}
-      <AnimatePresence>
-        {isEraTransitioning && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.45, ease: "easeInOut" }}
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-zinc-950/95 backdrop-blur-md text-stone-100 select-none pointer-events-auto"
-          >
-            {/* Soft Ambient Light Rays */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.08),transparent_70%)] pointer-events-none opacity-85" />
+      {/* 8. Guided Tour Mode Controller */}
+      <TourController 
+        selectedEraId={selectedEraId}
+        locations={LOCATIONS}
+        selectedLocationId={selectedLocationId}
+        onSelectLocation={handleSelectLocation}
+        isTourActive={isTourActive}
+        onToggleTour={setIsTourActive}
+      />
 
-            {/* Glowing Astrolabe/Compass Centerpiece */}
-            <motion.div
-              initial={{ scale: 0.85, rotate: -30, opacity: 0 }}
-              animate={{ scale: 1, rotate: 360, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 1.6, ease: "easeOut" }}
-              className="relative mb-8 p-6 rounded-full border border-amber-500/20 bg-amber-500/5 shadow-2xl shadow-amber-500/5 flex items-center justify-center"
-            >
-              {/* Spinning compass rings */}
-              <div className="absolute inset-0.5 rounded-full border border-dashed border-amber-500/35 animate-[spin_40s_linear_infinite]" />
-              <div className="absolute inset-2 rounded-full border border-amber-500/10 animate-[spin_20s_linear_infinite_reverse]" />
-              
-              <Compass className="w-16 h-16 text-amber-500 animate-pulse" />
-            </motion.div>
-
-            {/* Era Details */}
-            <div className="max-w-xl text-center px-6 z-10">
-              <motion.span
-                initial={{ y: 15, opacity: 0 }}
-                animate={{ y: 0, opacity: 0.6 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="block text-[10px] font-bold font-mono uppercase tracking-[0.25em] text-amber-500 mb-2"
-              >
-                Recalibrating Chronology
-              </motion.span>
-              
-              <motion.h2
-                initial={{ y: 15, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-4xl sm:text-5xl font-extrabold font-serif tracking-tight text-white mb-3"
-              >
-                {targetEraId === 'all' ? 'Universal History' : targetEra?.name}
-              </motion.h2>
-
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 0.4, duration: 0.8, ease: "circOut" }}
-                className="h-px w-24 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent mx-auto mb-4"
-              />
-
-              <motion.p
-                initial={{ y: 15, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.6 }}
-                className="text-sm font-mono text-amber-400/90 font-medium tracking-wide mb-4"
-              >
-                {targetEraId === 'all' ? 'Across the Sands of Time' : targetEra?.timeline}
-              </motion.p>
-
-              <motion.p
-                initial={{ y: 15, opacity: 0 }}
-                animate={{ y: 0, opacity: 0.7 }}
-                transition={{ delay: 0.6, duration: 0.6 }}
-                className="text-xs sm:text-sm text-stone-300 leading-relaxed font-serif max-w-lg mx-auto"
-              >
-                {targetEraId === 'all' 
-                  ? 'Merging all recorded centuries, ancient corridors, trade networks, and centers of classical knowledge into a single synchronized atlas.'
-                  : targetEra?.description}
-              </motion.p>
-            </div>
-
-            {/* Subtle shifting background grid lines */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none opacity-40" />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

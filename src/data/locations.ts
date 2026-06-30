@@ -34,13 +34,13 @@ export const HISTORICAL_ERAS = [
   },
   {
     id: "prophetic",
-    name: "Prophetic Era",
+    name: "The Life of Prophet Muhammad ﷺ",
     timeline: "610 - 632 CE",
     description: "The descent of revelation, the early struggle in Makkah, the migration (Hijrah) to Madinah, the establishment of the first Islamic polity, and the consolidation of Islam across the Arabian Peninsula."
   },
   {
     id: "rashidun",
-    name: "Rashidun",
+    name: "The Rashidun Caliphate",
     timeline: "632 - 661 CE",
     description: "The leadership of the Four Rightly Guided Caliphs—Abu Bakr, 'Umar, 'Uthman, and 'Ali (may Allah be pleased with them)—marked by significant expansion, codification of the Qur'an, and administrative development."
   },
