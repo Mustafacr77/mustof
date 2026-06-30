@@ -1,0 +1,6 @@
+{
+  "name": "Atlas of Islam",
+  "description": "An interactive historical atlas tracking early places, scholars, centers of knowledge, and trade routes throughout Islamic history.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Ensure full screen height and width with hidden overflow */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: var(--font-sans);
+}
+
+/* Scrollbar behaviors */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Leaflet overrides to match premium glassmorphic/dark style */
+.leaflet-container {
+  font-family: var(--font-sans) !important;
+}
+
+/* Custom Tooltip Styling */
+.leaflet-tooltip-pane .custom-leaflet-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Hide standard zoom controls since we built bespoke modern ones */
+.leaflet-control-zoom {
+  display: none !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(9, 9, 11, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  color: #a1a1aa !important;
+  border-top-left-radius: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  font-size: 9px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #34d399 !important;
+}
+
+/* Custom marker pulse speed */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+/* Custom marker transition and state classes */
+.marker-transition-wrapper {
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform, filter;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.marker-state-hidden {
+  opacity: 0 !important;
+  transform: scale(0.01) !important;
+  pointer-events: none !important;
+}
+
+.marker-state-selected {
+  opacity: 1 !important;
+  transform: scale(1.25) !important;
+  z-index: 1200 !important;
+  filter: drop-shadow(0 0 12px rgba(217, 119, 6, 0.5));
+}
+
+.marker-state-highlighted {
+  opacity: 1 !important;
+  transform: scale(1.08) !important;
+  z-index: 800 !important;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.3));
+}
+
+.marker-state-dimmed {
+  opacity: 0.25 !important;
+  transform: scale(0.8) !important;
+  filter: grayscale(60%) contrast(0.9) !important;
+  z-index: 100 !important;
+}
+
+.marker-state-default {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  z-index: 500 !important;
+}
+
+
+
+/* Base map solid background fallbacks while loading to match base theme */
+.map-style-classic { background-color: #f4f4f5 !important; }
+.map-style-historical { background-color: #faf5eb !important; }
+.map-style-terrain { background-color: #edf2f7 !important; }
+.map-style-dark { background-color: #0b0f19 !important; }
+.map-style-satellite { background-color: #020617 !important; }
+
+/* Animated Trade Route Caravans crawling along the paths */
+@keyframes crawl-trade {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+.animated-trade-route-line {
+  stroke-dasharray: 8, 8;
+  animation: crawl-trade 2.5s linear infinite;
+  transition: stroke-width 0.4s ease, opacity 0.4s ease;
+  will-change: stroke-dashoffset;
+}
+
+/* Animated Empire / Caliphate boundaries and corridors pulsing softly */
+@keyframes pulse-empire {
+  0% {
+    stroke-opacity: 0.4;
+    stroke-width: var(--base-width, 3px);
+  }
+  50% {
+    stroke-opacity: 0.8;
+    stroke-width: calc(var(--base-width, 3px) + 1.5px);
+  }
+  100% {
+    stroke-opacity: 0.4;
+    stroke-width: var(--base-width, 3px);
+  }
+}
+
+.animated-empire-line {
+  stroke-dasharray: 12, 6;
+  animation: crawl-trade 4s linear infinite, pulse-empire 3s ease-in-out infinite;
+  transition: stroke-width 0.4s ease, opacity 0.4s ease;
+}
+
+/* Leaflet map pane fine-tunes */
+.leaflet-container {
+  font-family: var(--font-sans) !important;
+}
+
+/* Glassmorphic custom Leaflet tooltips */
+.custom-leaflet-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.leaflet-tooltip-top:before {
+  border-top-color: transparent !important;
+}
+
+/* Fade effects for timeline changes */
+.era-fade-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+.era-fade-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Animated GeoJSON boundaries that draw themselves in and fade in softly */
+@keyframes geojson-boundary-draw {
+  0% {
+    stroke-dashoffset: 400;
+    stroke-opacity: 0;
+    fill-opacity: 0;
+  }
+  30% {
+    stroke-opacity: 0.8;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    stroke-opacity: 0.6;
+    fill-opacity: 0.15;
+  }
+}
+
+.animate-boundary-drawing {
+  stroke-dasharray: 8, 5;
+  stroke-dashoffset: 400;
+  animation: geojson-boundary-draw 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: stroke-dashoffset, stroke-opacity, fill-opacity;
+}
+
+@keyframes label-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(4px);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-label-fade-in {
+  animation: label-fade-in 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+/* Custom crosshair cursor for the distance measurement tool */
+.cursor-crosshair-map {
+  cursor: crosshair !important;
+}
+.cursor-crosshair-map .leaflet-interactive,
+.cursor-crosshair-map .leaflet-container {
+  cursor: crosshair !important;
+}
+
+
+
